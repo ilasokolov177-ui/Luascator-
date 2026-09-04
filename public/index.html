@@ -185,6 +185,7 @@ function obfuscate(code, level){
     let keysCount = parseInt(keysSelect.value) || 10;
     let protCount = parseInt(protectionSelect.value) || 5;
 
+    // ===== УРОВЕНЬ 1: СЛАБЫЙ =====
     if(level<=1){
         result='-- LuaScator by nxtzy_\n';
         for(let i=0;i<5;i++){result+='local '+randName()+'='+rand(1000,99999)+';\n'}
@@ -192,6 +193,7 @@ function obfuscate(code, level){
         return result;
     }
 
+    // ===== УРОВЕНЬ 5: СРЕДНИЙ =====
     if(level<=5){
         let varMap={};
         let reserved=['local','function','if','then','else','elseif','end','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','print','string','table','math','_G','game','workspace'];
@@ -216,6 +218,7 @@ function obfuscate(code, level){
         return result;
     }
 
+    // ===== УРОВЕНЬ 10: НОРМАЛЬНЫЙ =====
     if(level<=10){
         result+='local function main(...)\n';
         result+='local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
@@ -259,6 +262,7 @@ function obfuscate(code, level){
         return result;
     }
 
+    // ===== УРОВЕНЬ 15: СИЛЬНЫЙ =====
     if(level<=15){
         result+='local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
         result+='local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
@@ -304,6 +308,7 @@ function obfuscate(code, level){
         return result;
     }
 
+    // ===== УРОВЕНЬ 20: ЯДЕРНЫЙ =====
     if(level>=20){
         result+='local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
         result+='local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
@@ -330,12 +335,345 @@ function obfuscate(code, level){
             for(let i=0;i<chars.length;i++){result+='data['+(i+1)+'] = '+chars[i]+'\n'}
             result+='\nlocal output = ""\n';
             result+='local index = 1\n';
+      ```bash
+cd ~/Luascator- && cat > public/index.html << "EOF"
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LuaScator — Roblox Obfuscator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a12;color:#e0e0f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px}
+.container{background:linear-gradient(145deg,#12121e,#0d0d18);border-radius:28px;padding:30px;width:620px;max-width:100%;border:1px solid rgba(37,37,64,0.6);box-shadow:0 30px 80px rgba(0,0,0,0.8),inset 0 1px 0 rgba(255,255,255,0.03);animation:fadeIn 0.6s cubic-bezier(0.23,1,0.32,1)}
+@keyframes fadeIn{0%{opacity:0;transform:translateY(20px) scale(0.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.logo{font-size:28px;font-weight:800;background:linear-gradient(135deg,#7b3ffc,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px;display:flex;align-items:center;gap:8px}
+.logo-icon{font-size:30px;-webkit-text-fill-color:initial;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.version{background:rgba(123,63,252,0.15);padding:4px 14px;border-radius:30px;font-size:11px;color:#8888dd;border:1px solid rgba(123,63,252,0.2);font-weight:600;letter-spacing:0.3px}
+.badge{background:linear-gradient(135deg,rgba(123,63,252,0.1),rgba(0,212,255,0.1));border:1px solid rgba(123,63,252,0.15);padding:4px 14px;border-radius:30px;font-size:10px;color:#6666aa;text-transform:uppercase;letter-spacing:0.5px}
+.subtitle{color:#555577;font-size:13px;margin-bottom:20px;border-bottom:1px solid rgba(26,26,46,0.6);padding-bottom:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.subtitle span{color:#7b3ffc;font-weight:500}
+.settings{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:rgba(13,13,24,0.5);padding:16px;border-radius:16px;border:1px solid rgba(26,26,46,0.5);margin-bottom:18px}
+.setting-item{display:flex;align-items:center;gap:8px;padding:4px 0;transition:all 0.2s}
+.setting-item:hover{transform:translateX(4px)}
+.setting-item label{font-size:12px;color:#8888bb;font-weight:500;min-width:70px}
+.setting-item select{background:#0a0a14;border:1px solid #252545;color:#d0d0f0;padding:6px 10px;border-radius:10px;font-size:12px;flex:1;outline:none;transition:all 0.3s;cursor:pointer}
+.setting-item select:hover{border-color:#7b3ffc}
+.setting-item select:focus{border-color:#7b3ffc;box-shadow:0 0 25px rgba(123,63,252,0.08)}
+.textarea-wrap{position:relative;margin-bottom:14px}
+.textarea-wrap label{font-size:12px;color:#666688;margin-bottom:4px;display:block}
+textarea{width:100%;height:150px;background:#0a0a14;border:1px solid #1a1a2e;border-radius:14px;color:#d0d0f0;padding:14px 16px;font-family:'JetBrains Mono','Consolas',monospace;font-size:13px;resize:vertical;outline:none;transition:all 0.3s;line-height:1.5}
+textarea:focus{border-color:#7b3ffc;box-shadow:0 0 40px rgba(123,63,252,0.04)}
+textarea::placeholder{color:#333355}
+.btn-obfuscate{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#7b3ffc,#5a2bc0);color:#fff;transition:all 0.3s cubic-bezier(0.23,1,0.32,1);position:relative;overflow:hidden;letter-spacing:0.5px}
+.btn-obfuscate::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);transition:left 0.6s}
+.btn-obfuscate:hover::before{left:100%}
+.btn-obfuscate:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(123,63,252,0.25)}
+.btn-obfuscate:active{transform:translateY(0px);box-shadow:0 4px 20px rgba(123,63,252,0.15)}
+.btn-obfuscate:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+.row{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.row button{flex:1;background:rgba(26,26,46,0.6);color:#8888bb;border:1px solid rgba(42,42,74,0.4);padding:10px 12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:500;transition:all 0.25s cubic-bezier(0.23,1,0.32,1);min-width:55px;text-align:center}
+.row button:hover{background:rgba(34,34,68,0.8);color:#ccccee;border-color:#7b3ffc44;transform:translateY(-1px)}
+.row button:active{transform:translateY(0px)}
+.output-wrap{margin-top:10px}
+.output-wrap label{font-size:12px;color:#666688;margin-bottom:4px;display:flex;justify-content:space-between}
+.output-box{background:#0a0a14;border-radius:14px;border:1px solid #1a1a2e;padding:14px;min-height:100px;max-height:300px;overflow-y:auto;font-family:'JetBrains Mono','Consolas',monospace;font-size:12px;color:#a0a0c0;white-space:pre-wrap;word-wrap:break-word;transition:all 0.3s;line-height:1.4}
+.output-box:empty::before{content:"⬇ Результат появится здесь...";color:#333355;font-style:italic}
+.output-box::-webkit-scrollbar{width:4px}
+.output-box::-webkit-scrollbar-track{background:transparent}
+.output-box::-webkit-scrollbar-thumb{background:#252545;border-radius:10px}
+.status-bar{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid rgba(26,26,46,0.5);font-size:12px;color:#555577;flex-wrap:wrap;gap:6px}
+.status{display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;transition:all 0.3s}
+.dot.idle{background:#333355}
+.dot.loading{background:#ffcc00;animation:pulse-dot 0.8s ease-in-out infinite}
+.dot.success{background:#44ff88;box-shadow:0 0 20px rgba(68,255,136,0.2)}
+.dot.error{background:#ff4466;box-shadow:0 0 20px rgba(255,68,102,0.2)}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+.timer{color:#333366;font-family:monospace;font-size:11px}
+.footer{margin-top:14px;text-align:center;color:#222244;font-size:11px;border-top:1px solid rgba(17,17,34,0.4);padding-top:12px}
+.footer a{color:#444466;text-decoration:none;transition:color 0.3s}
+.footer a:hover{color:#7b3ffc}
+@media(max-width:550px){.settings{grid-template-columns:1fr}.container{padding:18px}.logo{font-size:22px}.subtitle{font-size:11px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<div class="logo"><span class="logo-icon">⚡</span> LuaScator</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="version">v25.0</span><span class="badge">🔥 Nuclear</span></div>
+</div>
+
+<div class="subtitle"><span>ROBLOX LUA OBFUSCATOR — <span>by nxtzy_</span></span><span style="color:#444466;">⚡ 32768 опкодов</span></div>
+
+<div class="settings">
+<div class="setting-item"><label>🛡 Уровень</label><select id="levelSelect"><option value="1">Слабый (1)</option><option value="5">Средний (5)</option><option value="10">Нормальный (10)</option><option value="15">Сильный (15)</option><option value="20">Ядерный (20)</option></select></div>
+<div class="setting-item"><label>🔑 Ключи</label><select id="keysSelect"><option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option></select></div>
+<div class="setting-item"><label>🧹 Мусор</label><select id="junkSelect"><option value="50">50</option><option value="100" selected>100</option><option value="200">200</option><option value="500">500</option></select></div>
+<div class="setting-item"><label>🎯 Защита</label><select id="protectionSelect"><option value="2">2</option><option value="5" selected>5</option><option value="10">10</option></select></div>
+</div>
+
+<div class="textarea-wrap"><label>📄 Входной код</label><textarea id="inputCode">print("Hello World")</textarea></div>
+
+<button class="btn-obfuscate" id="obfuscateBtn">🔒 OBFUSCATE</button>
+
+<div class="row">
+<button id="clearBtn">🗑 Очистить</button>
+<button id="loadExampleBtn">📂 Пример</button>
+<button id="copyBtn">📋 Копировать</button>
+<button id="downloadBtn">💾 Скачать</button>
+</div>
+
+<div class="output-wrap"><label><span>📦 Результат</span><span id="outputCount">0 символов</span></label><div class="output-box" id="output"></div></div>
+
+<div class="status-bar">
+<div class="status"><span class="dot idle" id="statusDot"></span><span id="statusText">Готов к работе</span></div>
+<span class="timer" id="timerDisplay">⏱ 0.00с</span>
+</div>
+
+<div class="footer"><a href="#">LuaScator</a> — <a href="#">by nxtzy_</a> — <a href="#">для Luasnapper</a></div>
+</div>
+
+<script>
+const input=document.getElementById('inputCode');
+const output=document.getElementById('output');
+const btn=document.getElementById('obfuscateBtn');
+const statusText=document.getElementById('statusText');
+const statusDot=document.getElementById('statusDot');
+const timerDisplay=document.getElementById('timerDisplay');
+const outputCount=document.getElementById('outputCount');
+const levelSelect=document.getElementById('levelSelect');
+const junkSelect=document.getElementById('junkSelect');
+const keysSelect=document.getElementById('keysSelect');
+const protectionSelect=document.getElementById('protectionSelect');
+
+function setStatus(text,type){statusText.textContent=text;statusDot.className='dot '+type}
+
+const example='print("Hello World")';
+
+document.getElementById('loadExampleBtn').onclick=function(){input.value=example;setStatus('Пример загружен','idle')};
+document.getElementById('clearBtn').onclick=function(){input.value='';setStatus('Очищено','idle')};
+document.getElementById('copyBtn').onclick=function(){
+const t=output.textContent;
+if(!t||t.includes('⬇ Результат')){setStatus('Нет данных','error');return}
+navigator.clipboard.writeText(t).then(()=>setStatus('Скопировано!','success')).catch(()=>{const r=document.createRange();r.selectNode(output);window.getSelection().removeAllRanges();window.getSelection().addRange(r);document.execCommand('copy');setStatus('Скопировано!','success')})};
+document.getElementById('downloadBtn').onclick=function(){
+const t=output.textContent;
+if(!t||t.includes('⬇ Результат')){setStatus('Нет данных','error');return}
+const b=new Blob([t],{type:'text/plain'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='obfuscated_'+Date.now()+'.lua';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);setStatus('Скачано!','success')};
+
+function randName(){let c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';let n='';for(let i=0;i<6;i++)n+=c.charAt(Math.floor(Math.random()*c.length));return n}
+
+function makeSafeJunk(count){
+    let junk='';
+    let chunkSize=40;
+    let chunks=Math.ceil(count/chunkSize);
+    for(let c=0;c<chunks;c++){
+        junk+='do local ';
+        let names=[];
+        let totalInChunk=Math.min(chunkSize,count-c*chunkSize);
+        for(let i=0;i<totalInChunk;i++){
+            let name=randName();
+            names.push(name);
+            junk+=name+'=0';
+            if(i<totalInChunk-1) junk+=',';
+        }
+        junk+=' end\n';
+    }
+    return junk;
+}
+
+function makeBigStrings(count){
+    let strs='';
+    let chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for(let i=0;i<count;i++){
+        let len=Math.floor(Math.random()*30)+10;
+        let s='';
+        for(let j=0;j<len;j++){
+            s+=chars.charAt(Math.floor(Math.random()*chars.length));
+        }
+        strs+='local '+randName()+'="'+s+'";\n';
+    }
+    return strs;
+}
+
+function makeGarbageBlocks(count){
+    let blocks='';
+    for(let i=0;i<count;i++){
+        let r=Math.random();
+        if(r<0.3){
+            blocks+='do local a='+Math.floor(Math.random()*999)+'; local b=function() return a end; end\n';
+        }else if(r<0.6){
+            blocks+='do local t={}; for i=1,'+Math.floor(Math.random()*10+1)+' do t[i]=i end end\n';
+        }else{
+            blocks+='do local s=""; for i=1,'+Math.floor(Math.random()*5+1)+' do s=s.."a" end end\n';
+        }
+    }
+    return blocks;
+}
+
+function obfuscate(code, level){
+    function rand(min, max){return Math.floor(Math.random()*(max-min+1))+min}
+    
+    let result = '';
+    let lines = code.split('\n');
+    let junkCount = parseInt(junkSelect.value) || 100;
+    let keysCount = parseInt(keysSelect.value) || 10;
+    let protCount = parseInt(protectionSelect.value) || 5;
+
+    // ===== УРОВЕНЬ 1: СЛАБЫЙ =====
+    if(level<=1){
+        result='-- LuaScator by nxtzy_\n';
+        for(let i=0;i<5;i++){result+='local '+randName()+'='+rand(1000,99999)+';\n'}
+        result+='\n'+code;
+        return result;
+    }
+
+    // ===== УРОВЕНЬ 5: СРЕДНИЙ =====
+    if(level<=5){
+        let varMap={};
+        let reserved=['local','function','if','then','else','elseif','end','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','print','string','table','math','_G','game','workspace'];
+        for(let line of lines){
+            let newLine=line;
+            let words=line.split(/\b/);
+            for(let w of words){
+                let clean=w.trim();
+                if(clean.length>1&&!reserved.includes(clean)&&!varMap[clean]){
+                    let match=clean.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/);
+                    if(match){varMap[clean]=randName()}
+                }
+            }
+            for(let [oldName,newName] of Object.entries(varMap)){
+                newLine=newLine.split(oldName).join(newName)
+            }
+            result+=newLine+'\n'
+        }
+        result+=makeSafeJunk(Math.floor(junkCount/2));
+        result+=makeBigStrings(5);
+        result+=makeGarbageBlocks(10);
+        return result;
+    }
+
+    // ===== УРОВЕНЬ 10: НОРМАЛЬНЫЙ =====
+    if(level<=10){
+        result+='local function main(...)\n';
+        result+='local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
+        result+='local str = env.string\n';
+        result+='local char = str.char\n\n';
+        result+=makeSafeJunk(junkCount);
+        result+=makeBigStrings(10);
+        result+=makeGarbageBlocks(20);
+        result+='\n';
+        let printMatch=code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
+        if(printMatch){
+            let text=printMatch[1];
+            let chars=[];
+            for(let i=0;i<text.length;i++){
+                let codeChar=text.charCodeAt(i);
+                let xor1=rand(100,500);
+                let xor2=codeChar^xor1;
+                chars.push('char(bit32.bxor('+xor1+','+xor2+'))')
+            }
+            result+='local data = {}\n';
+            for(let i=0;i<chars.length;i++){result+='data['+(i+1)+'] = '+chars[i]+'\n'}
+            result+='\nlocal output = ""\n';
+            result+='local index = 1\n';
             result+='local total = #data\n';
             result+='while index <= total do\n';
             result+='    output = output .. data[index]\n';
             result+='    index = index + 1\n';
+            result+='end\n\n';
+            let printChars=[];
+            let printWord='print';
+            for(let i=0;i<printWord.length;i++){
+                let codeChar=printWord.charCodeAt(i);
+                let xor1=rand(100,500);
+                let xor2=codeChar^xor1;
+                printChars.push('char(bit32.bxor('+xor1+','+xor2+'))')
+            }
+            result+='env['+printChars.join(' .. ')+'](output)\n';
+        }else{for(let line of lines){result+=line+'\n'}}
+        result+='end\n';
+        result+='main(...)';
+        return result;
+    }
 
+    // ===== УРОВЕНЬ 15: СИЛЬНЫЙ =====
+    if(level<=15){
+        result+='local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
+        result+='local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
+        result+='local function main(...)\n';
+        result+='local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
+        result+='local str = env.string\n';
+        result+='local char = str.char\n\n';
+        result+=makeSafeJunk(junkCount*2);
+        result+=makeBigStrings(20);
+        result+=makeGarbageBlocks(40);
+        result+='\n';
+        let printMatch=code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
+        if(printMatch){
+            let text=printMatch[1];
+            let chars=[];
+            for(let i=0;i<text.length;i++){
+                let codeChar=text.charCodeAt(i);
+                let xor1=rand(200,800);
+                let xor2=codeChar^xor1;
+                chars.push('char(bit32.bxor('+xor1+','+xor2+'))')
+            }
+            result+='local data = {}\n';
+            for(let i=0;i<chars.length;i++){result+='data['+(i+1)+'] = '+chars[i]+'\n'}
+            result+='\nlocal output = ""\n';
+            result+='local index = 1\n';
+            result+='local total = #data\n';
+            result+='while index <= total do\n';
+            result+='    output = output .. data[index]\n';
+            result+='    index = index + 1\n';
+            result+='end\n\n';
+            let printChars=[];
+            let printWord='print';
+            for(let i=0;i<printWord.length;i++){
+                let codeChar=printWord.charCodeAt(i);
+                let xor1=rand(200,800);
+                let xor2=codeChar^xor1;
+                printChars.push('char(bit32.bxor('+xor1+','+xor2+'))')
+            }
+            result+='env['+printChars.join(' .. ')+'](output)\n';
+        }else{for(let line of lines){result+=line+'\n'}}
+        result+='end\n';
+        result+='main(...)';
+        return result;
+    }
 
+    // ===== УРОВЕНЬ 20: ЯДЕРНЫЙ =====
+    if(level>=20){
+        result+='local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
+        result+='local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
+        result+='local function D()if type(game)~="userdata"then while true do end end if type(workspace)~="userdata"then while true do end end if type(Instance)~="table"then while true do end end end pcall(D)\n\n';
+        result+='local function main(...)\n';
+        result+='local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
+        result+='local str = env.string\n';
+        result+='local char = str.char\n\n';
+        result+=makeSafeJunk(junkCount*3);
+        result+=makeBigStrings(30);
+        result+=makeGarbageBlocks(60);
+        result+='\n';
+        let printMatch=code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
+        if(printMatch){
+            let text=printMatch[1];
+            let chars=[];
+            for(let i=0;i<text.length;i++){
+                let codeChar=text.charCodeAt(i);
+                let xor1=rand(300,900);
+                let xor2=codeChar^xor1;
+                chars.push('char(bit32.bxor('+xor1+','+xor2+'))')
+            }
+            result+='local data = {}\n';
+            for(let i=0;i<chars.length;i++){result+='data['+(i+1)+'] = '+chars[i]+'\n'}
+            result+='\nlocal output = ""\n';
+            result+='local index = 1\n'
 ```bash
 cd ~/Luascator- && cat > public/index.html << "EOF"
 <!DOCTYPE html>
@@ -525,6 +863,7 @@ function obfuscate(code, level){
     let keysCount = parseInt(keysSelect.value) || 10;
     let protCount = parseInt(protectionSelect.value) || 5;
 
+    // ===== УРОВЕНЬ 1: СЛАБЫЙ =====
     if(level<=1){
         result='-- LuaScator by nxtzy_\n';
         for(let i=0;i<5;i++){result+='local '+randName()+'='+rand(1000,99999)+';\n'}
@@ -532,6 +871,7 @@ function obfuscate(code, level){
         return result;
     }
 
+    // ===== УРОВЕНЬ 5: СРЕДНИЙ =====
     if(level<=5){
         let varMap={};
         let reserved=['local','function','if','then','else','elseif','end','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','print','string','table','math','_G','game','workspace'];
@@ -556,6 +896,7 @@ function obfuscate(code, level){
         return result;
     }
 
+    // ===== УРОВЕНЬ 10: НОРМАЛЬНЫЙ =====
     if(level<=10){
         result+='local function main(...)\n';
         result+='local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
@@ -599,6 +940,7 @@ function obfuscate(code, level){
         return result;
     }
 
+    // ===== УРОВЕНЬ 15: СИЛЬНЫЙ =====
     if(level<=15){
         result+='local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
         result+='local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
@@ -643,345 +985,8 @@ function obfuscate(code, level){
         result+='main(...)';
         return result;
     }
-
+// ===== УРОВЕНЬ 20: ЯДЕРНЫЙ =====
     if(level>=20){
-        result+='local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
-        result+='local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
-        result+='local function D()if type(game)~="userdata"then while true do end end if type(workspace)~="userdata"then while true do end end if type(Instance)~="table"then while true do end end end pcall(D)\n\n';
-        result+='local function main(...)\n';
-        result+='local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
-        result+='local str = env.string\n';
-        result+='local char = str.char\n\n';
-        result+=makeSafeJunk(junkCount*3);
-        result+=makeBigStrings(30);
-        result+=makeGarbageBlocks(60);
-        result+='\n';
-        let printMatch=code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
-        if(printMatch){
-            let text=printMatch[1];
-            let chars=[];
-            for(let i=0;i<text.length;i++){
-                let codeChar=text.charCodeAt(i);
-                let xor1=rand(300,900);
-                let xor2=codeChar^xor1;
-                chars.push('char(bit32.bxor('+xor1+','+xor2+'))')
-            }
-            result+='local data = {}\n';
-            for(let i=0;i<chars.length;i++){result+='data['+(i+1)+'] = '+chars[i]+'\n'}
-            result+='\nlocal output = ""\n';
-            result+='local index = 1\n';
-            result+='local total = #data\n';
-            result+='while index <= total do\n';
-            result+='    output = output .. data[index]\n';
-            result+='    index = index
-```bash
-cd ~/Luascator- && cat > public/index.html << "EOF"
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LuaScator — Roblox Obfuscator</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a12;color:#e0e0f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px}
-.container{background:linear-gradient(145deg,#12121e,#0d0d18);border-radius:28px;padding:30px;width:620px;max-width:100%;border:1px solid rgba(37,37,64,0.6);box-shadow:0 30px 80px rgba(0,0,0,0.8),inset 0 1px 0 rgba(255,255,255,0.03);animation:fadeIn 0.6s cubic-bezier(0.23,1,0.32,1)}
-@keyframes fadeIn{0%{opacity:0;transform:translateY(20px) scale(0.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
-.logo{font-size:28px;font-weight:800;background:linear-gradient(135deg,#7b3ffc,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px;display:flex;align-items:center;gap:8px}
-.logo-icon{font-size:30px;-webkit-text-fill-color:initial;animation:float 3s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-.version{background:rgba(123,63,252,0.15);padding:4px 14px;border-radius:30px;font-size:11px;color:#8888dd;border:1px solid rgba(123,63,252,0.2);font-weight:600;letter-spacing:0.3px}
-.badge{background:linear-gradient(135deg,rgba(123,63,252,0.1),rgba(0,212,255,0.1));border:1px solid rgba(123,63,252,0.15);padding:4px 14px;border-radius:30px;font-size:10px;color:#6666aa;text-transform:uppercase;letter-spacing:0.5px}
-.subtitle{color:#555577;font-size:13px;margin-bottom:20px;border-bottom:1px solid rgba(26,26,46,0.6);padding-bottom:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
-.subtitle span{color:#7b3ffc;font-weight:500}
-.settings{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:rgba(13,13,24,0.5);padding:16px;border-radius:16px;border:1px solid rgba(26,26,46,0.5);margin-bottom:18px}
-.setting-item{display:flex;align-items:center;gap:8px;padding:4px 0;transition:all 0.2s}
-.setting-item:hover{transform:translateX(4px)}
-.setting-item label{font-size:12px;color:#8888bb;font-weight:500;min-width:70px}
-.setting-item select{background:#0a0a14;border:1px solid #252545;color:#d0d0f0;padding:6px 10px;border-radius:10px;font-size:12px;flex:1;outline:none;transition:all 0.3s;cursor:pointer}
-.setting-item select:hover{border-color:#7b3ffc}
-.setting-item select:focus{border-color:#7b3ffc;box-shadow:0 0 25px rgba(123,63,252,0.08)}
-.textarea-wrap{position:relative;margin-bottom:14px}
-.textarea-wrap label{font-size:12px;color:#666688;margin-bottom:4px;display:block}
-textarea{width:100%;height:150px;background:#0a0a14;border:1px solid #1a1a2e;border-radius:14px;color:#d0d0f0;padding:14px 16px;font-family:'JetBrains Mono','Consolas',monospace;font-size:13px;resize:vertical;outline:none;transition:all 0.3s;line-height:1.5}
-textarea:focus{border-color:#7b3ffc;box-shadow:0 0 40px rgba(123,63,252,0.04)}
-textarea::placeholder{color:#333355}
-.btn-obfuscate{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#7b3ffc,#5a2bc0);color:#fff;transition:all 0.3s cubic-bezier(0.23,1,0.32,1);position:relative;overflow:hidden;letter-spacing:0.5px}
-.btn-obfuscate::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);transition:left 0.6s}
-.btn-obfuscate:hover::before{left:100%}
-.btn-obfuscate:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(123,63,252,0.25)}
-.btn-obfuscate:active{transform:translateY(0px);box-shadow:0 4px 20px rgba(123,63,252,0.15)}
-.btn-obfuscate:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
-.row{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
-.row button{flex:1;background:rgba(26,26,46,0.6);color:#8888bb;border:1px solid rgba(42,42,74,0.4);padding:10px 12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:500;transition:all 0.25s cubic-bezier(0.23,1,0.32,1);min-width:55px;text-align:center}
-.row button:hover{background:rgba(34,34,68,0.8);color:#ccccee;border-color:#7b3ffc44;transform:translateY(-1px)}
-.row button:active{transform:translateY(0px)}
-.output-wrap{margin-top:10px}
-.output-wrap label{font-size:12px;color:#666688;margin-bottom:4px;display:flex;justify-content:space-between}
-.output-box{background:#0a0a14;border-radius:14px;border:1px solid #1a1a2e;padding:14px;min-height:100px;max-height:300px;overflow-y:auto;font-family:'JetBrains Mono','Consolas',monospace;font-size:12px;color:#a0a0c0;white-space:pre-wrap;word-wrap:break-word;transition:all 0.3s;line-height:1.4}
-.output-box:empty::before{content:"⬇ Результат появится здесь...";color:#333355;font-style:italic}
-.output-box::-webkit-scrollbar{width:4px}
-.output-box::-webkit-scrollbar-track{background:transparent}
-.output-box::-webkit-scrollbar-thumb{background:#252545;border-radius:10px}
-.status-bar{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid rgba(26,26,46,0.5);font-size:12px;color:#555577;flex-wrap:wrap;gap:6px}
-.status{display:flex;align-items:center;gap:8px}
-.dot{width:10px;height:10px;border-radius:50%;display:inline-block;transition:all 0.3s}
-.dot.idle{background:#333355}
-.dot.loading{background:#ffcc00;animation:pulse-dot 0.8s ease-in-out infinite}
-.dot.success{background:#44ff88;box-shadow:0 0 20px rgba(68,255,136,0.2)}
-.dot.error{background:#ff4466;box-shadow:0 0 20px rgba(255,68,102,0.2)}
-@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
-.timer{color:#333366;font-family:monospace;font-size:11px}
-.footer{margin-top:14px;text-align:center;color:#222244;font-size:11px;border-top:1px solid rgba(17,17,34,0.4);padding-top:12px}
-.footer a{color:#444466;text-decoration:none;transition:color 0.3s}
-.footer a:hover{color:#7b3ffc}
-@media(max-width:550px){.settings{grid-template-columns:1fr}.container{padding:18px}.logo{font-size:22px}.subtitle{font-size:11px}}
-</style>
-</head>
-<body>
-<div class="container">
-<div class="header">
-<div class="logo"><span class="logo-icon">⚡</span> LuaScator</div>
-<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="version">v25.0</span><span class="badge">🔥 Nuclear</span></div>
-</div>
-
-<div class="subtitle"><span>ROBLOX LUA OBFUSCATOR — <span>by nxtzy_</span></span><span style="color:#444466;">⚡ 32768 опкодов</span></div>
-
-<div class="settings">
-<div class="setting-item"><label>🛡 Уровень</label><select id="levelSelect"><option value="1">Слабый (1)</option><option value="5">Средний (5)</option><option value="10">Нормальный (10)</option><option value="15">Сильный (15)</option><option value="20">Ядерный (20)</option></select></div>
-<div class="setting-item"><label>🔑 Ключи</label><select id="keysSelect"><option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option></select></div>
-<div class="setting-item"><label>🧹 Мусор</label><select id="junkSelect"><option value="50">50</option><option value="100" selected>100</option><option value="200">200</option><option value="500">500</option></select></div>
-<div class="setting-item"><label>🎯 Защита</label><select id="protectionSelect"><option value="2">2</option><option value="5" selected>5</option><option value="10">10</option></select></div>
-</div>
-
-<div class="textarea-wrap"><label>📄 Входной код</label><textarea id="inputCode">print("Hello World")</textarea></div>
-
-<button class="btn-obfuscate" id="obfuscateBtn">🔒 OBFUSCATE</button>
-
-<div class="row">
-<button id="clearBtn">🗑 Очистить</button>
-<button id="loadExampleBtn">📂 Пример</button>
-<button id="copyBtn">📋 Копировать</button>
-<button id="downloadBtn">💾 Скачать</button>
-</div>
-
-<div class="output-wrap"><label><span>📦 Результат</span><span id="outputCount">0 символов</span></label><div class="output-box" id="output"></div></div>
-
-<div class="status-bar">
-<div class="status"><span class="dot idle" id="statusDot"></span><span id="statusText">Готов к работе</span></div>
-<span class="timer" id="timerDisplay">⏱ 0.00с</span>
-</div>
-
-<div class="footer"><a href="#">LuaScator</a> — <a href="#">by nxtzy_</a> — <a href="#">для Luasnapper</a></div>
-</div>
-
-<script>
-const input=document.getElementById('inputCode');
-const output=document.getElementById('output');
-const btn=document.getElementById('obfuscateBtn');
-const statusText=document.getElementById('statusText');
-const statusDot=document.getElementById('statusDot');
-const timerDisplay=document.getElementById('timerDisplay');
-const outputCount=document.getElementById('outputCount');
-const levelSelect=document.getElementById('levelSelect');
-const junkSelect=document.getElementById('junkSelect');
-const keysSelect=document.getElementById('keysSelect');
-const protectionSelect=document.getElementById('protectionSelect');
-
-function setStatus(text,type){statusText.textContent=text;statusDot.className='dot '+type}
-
-const example='print("Hello World")';
-
-document.getElementById('loadExampleBtn').onclick=function(){input.value=example;setStatus('Пример загружен','idle')};
-document.getElementById('clearBtn').onclick=function(){input.value='';setStatus('Очищено','idle')};
-document.getElementById('copyBtn').onclick=function(){
-const t=output.textContent;
-if(!t||t.includes('⬇ Результат')){setStatus('Нет данных','error');return}
-navigator.clipboard.writeText(t).then(()=>setStatus('Скопировано!','success')).catch(()=>{const r=document.createRange();r.selectNode(output);window.getSelection().removeAllRanges();window.getSelection().addRange(r);document.execCommand('copy');setStatus('Скопировано!','success')})};
-document.getElementById('downloadBtn').onclick=function(){
-const t=output.textContent;
-if(!t||t.includes('⬇ Результат')){setStatus('Нет данных','error');return}
-const b=new Blob([t],{type:'text/plain'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='obfuscated_'+Date.now()+'.lua';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);setStatus('Скачано!','success')};
-
-function randName(){let c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';let n='';for(let i=0;i<6;i++)n+=c.charAt(Math.floor(Math.random()*c.length));return n}
-
-function makeSafeJunk(count){
-    let junk='';
-    let chunkSize=40;
-    let chunks=Math.ceil(count/chunkSize);
-    for(let c=0;c<chunks;c++){
-        junk+='do local ';
-        let names=[];
-        let totalInChunk=Math.min(chunkSize,count-c*chunkSize);
-        for(let i=0;i<totalInChunk;i++){
-            let name=randName();
-            names.push(name);
-            junk+=name+'=0';
-            if(i<totalInChunk-1) junk+=',';
-        }
-        junk+=' end\n';
-    }
-    return junk;
-}
-
-function makeBigStrings(count){
-    let strs='';
-    let chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for(let i=0;i<count;i++){
-        let len=Math.floor(Math.random()*30)+10;
-        let s='';
-        for(let j=0;j<len;j++){
-            s+=chars.charAt(Math.floor(Math.random()*chars.length));
-        }
-        strs+='local '+randName()+'="'+s+'";\n';
-    }
-    return strs;
-}
-
-function makeGarbageBlocks(count){
-    let blocks='';
-    for(let i=0;i<count;i++){
-        let r=Math.random();
-        if(r<0.3){
-            blocks+='do local a='+Math.floor(Math.random()*999)+'; local b=function() return a end; end\n';
-        }else if(r<0.6){
-            blocks+='do local t={}; for i=1,'+Math.floor(Math.random()*10+1)+' do t[i]=i end end\n';
-        }else{
-            blocks+='do local s=""; for i=1,'+Math.floor(Math.random()*5+1)+' do s=s.."a" end end\n';
-        }
-    }
-    return blocks;
-}
-
-function obfuscate(code, level){
-    function rand(min, max){return Math.floor(Math.random()*(max-min+1))+min}
-    
-    let result = '';
-    let lines = code.split('\n');
-    let junkCount = parseInt(junkSelect.value) || 100;
-    let keysCount = parseInt(keysSelect.value) || 10;
-    let protCount = parseInt(protectionSelect.value) || 5;
-
-    if(level<=1){
-        result='-- LuaScator by nxtzy_\n';
-        for(let i=0;i<5;i++){result+='local '+randName()+'='+rand(1000,99999)+';\n'}
-        result+='\n'+code;
-        return result;
-    }
-
-    if(level<=5){
-        let varMap={};
-        let reserved=['local','function','if','then','else','elseif','end','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','print','string','table','math','_G','game','workspace'];
-        for(let line of lines){
-            let newLine=line;
-            let words=line.split(/\b/);
-            for(let w of words){
-                let clean=w.trim();
-                if(clean.length>1&&!reserved.includes(clean)&&!varMap[clean]){
-                    let match=clean.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/);
-                    if(match){varMap[clean]=randName()}
-                }
-            }
-            for(let [oldName,newName] of Object.entries(varMap)){
-                newLine=newLine.split(oldName).join(newName)
-            }
-            result+=newLine+'\n'
-        }
-        result+=makeSafeJunk(Math.floor(junkCount/2));
-        result+=makeBigStrings(5);
-        result+=makeGarbageBlocks(10);
-        return result;
-    }
-
-    if(level<=10){
-        result+='local function main(...)\n';
-        result+='local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
-        result+='local str = env.string\n';
-        result+='local char = str.char\n\n';
-        result+=makeSafeJunk(junkCount);
-        result+=makeBigStrings(10);
-        result+=makeGarbageBlocks(20);
-        result+='\n';
-        let printMatch=code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
-        if(printMatch){
-            let text=printMatch[1];
-            let chars=[];
-            for(let i=0;i<text.length;i++){
-                let codeChar=text.charCodeAt(i);
-                let xor1=rand(100,500);
-                let xor2=codeChar^xor1;
-                chars.push('char(bit32.bxor('+xor1+','+xor2+'))')
-            }
-            result+='local data = {}\n';
-            for(let i=0;i<chars.length;i++){result+='data['+(i+1)+'] = '+chars[i]+'\n'}
-            result+='\nlocal output = ""\n';
-            result+='local index = 1\n';
-            result+='local total = #data\n';
-            result+='while index <= total do\n';
-            result+='    output = output .. data[index]\n';
-            result+='    index = index + 1\n';
-            result+='end\n\n';
-            let printChars=[];
-            let printWord='print';
-            for(let i=0;i<printWord.length;i++){
-                let codeChar=printWord.charCodeAt(i);
-                let xor1=rand(100,500);
-                let xor2=codeChar^xor1;
-                printChars.push('char(bit32.bxor('+xor1+','+xor2+'))')
-            }
-            result+='env['+printChars.join(' .. ')+'](output)\n';
-        }else{for(let line of lines){result+=line+'\n'}}
-        result+='end\n';
-        result+='main(...)';
-        return result;
-    }
-
-    if(level<=15){
-        result+='local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
-        result+='local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
-        result+='local function main(...)\n';
-        result+='local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
-        result+='local str = env.string\n';
-        result+='local char = str.char\n\n';
-        result+=makeSafeJunk(junkCount*2);
-        result+=makeBigStrings(20);
-        result+=makeGarbageBlocks(40);
-        result+='\n';
-        let printMatch=code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
-        if(printMatch){
-            let text=printMatch[1];
-            let chars=[];
-            for(let i=0;i<text.length;i++){
-                let codeChar=text.charCodeAt(i);
-                let xor1=rand(200,800);
-                let xor2=codeChar^xor1;
-                chars.push('char(bit32.bxor('+xor1+','+xor2+'))')
-            }
-            result+='local data = {}\n';
-            for(let i=0;i<chars.length;i++){result+='data['+(i+1)+'] = '+chars[i]+'\n'}
-            result+='\nlocal output = ""\n';
-            result+='local index = 1\n';
-            result+='local total = #data\n';
-            result+='while index <= total do\n';
-            result+='    output = output .. data[index]\n';
-            result+='    index = index + 1\n';
-            result+='end\n\n';
-            let printChars=[];
-            let printWord='print';
-            for(let i=0;i<printWord.length;i++){
-                let codeChar=printWord.charCodeAt(i);
-                let xor1=rand(200,800);
-                let xor2=codeChar^xor1;
-                printChars.push('char(bit32.bxor('+xor1+','+xor2+'))')
-            }
-            result+='env['+printChars.join(' .. ')+'](output)\n';
-        }else{for(let line of lines){result+=line+'\n'}}
-        result+='end\n';
-        result+='main(...)';
-        return result;
-    }
-if(level>=20){
         result+='local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
         result+='local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
         result+='local function D()if type(game)~="userdata"then while true do end end if type(workspace)~="userdata"then while true do end end if type(Instance)~="table"then while true do end end end pcall(D)\n\n';
