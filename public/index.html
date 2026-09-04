@@ -83,27 +83,29 @@ const t=output.textContent;
 if(!t||t.includes('Результат')){setStatus('Нет данных','error');return}
 const b=new Blob([t],{type:'text/plain'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='obfuscated_'+Date.now()+'.lua';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);setStatus('Скачано!','success')};
 
-function randName(){let c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';let n='';for(let i=0;i<8;i++)n+=c.charAt(Math.floor(Math.random()*c.length));return n}
+function randName(){let c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';let n='';for(let i=0;i<6;i++)n+=c.charAt(Math.floor(Math.random()*c.length));return n}
 
-function makeBigJunk(count, extra){
+function makeJunk(count){
     let junk = '';
     for(let i=0;i<count;i++){
         let name = randName();
-        let val = Math.floor(Math.random()*99999)+1000;
+        let val = Math.floor(Math.random()*9999)+1000;
         junk += 'local ' + name + '=' + val + ';\n';
-        if(i % 2 === 0) junk += 'local ' + randName() + '=function()return ' + Math.floor(Math.random()*999)+1 + ' end;\n';
-        if(i % 3 === 0) junk += 'local ' + randName() + '=math.sin(' + Math.floor(Math.random()*999)+1 + ')*math.cos(' + Math.floor(Math.random()*999)+1 + ');\n';
-        if(i % 5 === 0) junk += 'local ' + randName() + '=string.char(' + (Math.floor(Math.random()*25)+65) + ');\n';
-        if(i % 7 === 0) junk += 'local ' + randName() + '=table.concat({}, "");\n';
-        if(i % 11 === 0) junk += 'local ' + randName() + '=os.time();\n';
-        if(i % 13 === 0) junk += 'local ' + randName() + '=bit32.bxor(' + Math.floor(Math.random()*9999)+1 + ', ' + Math.floor(Math.random()*9999)+1 + ');\n';
-    }
-    if(extra){
-        for(let e=0;e<extra;e++){
-            junk += 'do local ' + randName() + '=' + Math.floor(Math.random()*999)+1 + '; local ' + randName() + '=function() return ' + Math.floor(Math.random()*999)+1 + ' end; end\n';
-        }
+        if(i % 3 === 0) junk += 'local ' + randName() + '=function()return ' + (Math.floor(Math.random()*99)+1) + ' end;\n';
     }
     return junk;
+}
+
+function makeBigBlocks(count){
+    let blocks = '';
+    for(let i=0;i<count;i++){
+        blocks += '\ndo local ' + randName() + '={}';
+        blocks += '; local ' + randName() + '=0';
+        blocks += '; local ' + randName() + '=""';
+        blocks += '; local ' + randName() + '=function() return 1 end';
+        blocks += '; end\n';
+    }
+    return blocks;
 }
 
 function obfuscate(code, level){
@@ -115,12 +117,12 @@ function obfuscate(code, level){
     // ===== УРОВЕНЬ 1: СЛАБЫЙ =====
     if(level <= 1){
         result = '-- LuaScator by nxtzy_\n';
-        result += makeBigJunk(5, 0);
+        result += makeJunk(3);
         result += '\n' + code;
         return result;
     }
 
-    // ===== УРОВЕНЬ 5: СРЕДНИЙ (в 5 раз больше строк) =====
+    // ===== УРОВЕНЬ 5: СРЕДНИЙ =====
     if(level <= 5){
         let varMap = {};
         let reserved = ['local','function','if','then','else','elseif','end','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','print','string','table','math','_G','game','workspace'];
@@ -142,30 +144,143 @@ function obfuscate(code, level){
             }
             result += newLine + '\n';
         }
-        // 50 мусорных
-        result += makeBigJunk(50, 10);
-        // 5 копий кода с разными именами
-        for(let c=0; c<5; c++){
-            let tmp = result.split('\n');
-            let newBlock = '';
-            for(let i=0; i<tmp.length; i++){
-                if(tmp[i].includes('=') && !tmp[i].includes('function') && !tmp[i].includes('print')){
-                    newBlock += 'local ' + randName() + '=' + tmp[i].split('=')[1] + '\n';
-                }
-            }
-            result += '\n-- copy ' + (c+1) + ' --\n' + newBlock;
-        }
+        result += makeJunk(10);
+        result += makeBigBlocks(20);
         return result;
     }
 
-    // ===== УРОВЕНЬ 10: НОРМАЛЬНЫЙ (в 8 раз больше строк) =====
+    // ===== УРОВЕНЬ 10: НОРМАЛЬНЫЙ =====
     if(level <= 10){
         result += 'local function main(...)\n';
         result += 'local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
         result += 'local str = env.string\n';
         result += 'local char = str.char\n\n';
         
-        result += makeBigJunk(100, 20);
+        result += makeJunk(20);
+        result += '\n';
+        
+        let printMatch = code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
+        if(printMatch){
+            let text = printMatch[1];
+            let chars = [];
+            for(let i=0; i<text.length; i++){
+                let codeChar = text.charCodeAt(i);
+                let xor1 = rand(100, 500);
+                let xor2 = codeChar ^ xor1;
+                chars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
+            }
+            
+            result += 'local data = {}\n';
+            for(let i=0; i<chars.length; i++){
+                result += `data[${i+1}] = ${chars[i]}\n`;
+            }
+            result += '\nlocal output = ""\n';
+            result += 'local index = 1\n';
+            result += 'local total = #data\n';
+            result += 'while index <= total do\n';
+            result += '    output = output .. data[index]\n';
+            result += '    index = index + 1\n';
+            result += 'end\n\n';
+            
+            let printChars = [];
+            let printWord = 'print';
+            for(let i=0; i<printWord.length; i++){
+                let codeChar = printWord.charCodeAt(i);
+                let xor1 = rand(100, 500);
+                let xor2 = codeChar ^ xor1;
+                printChars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
+            }
+            
+            result += `env[${printChars.join(' .. ')}](output)\n`;
+            
+            result += makeBigBlocks(30);
+        } else {
+            for(let line of lines){
+                result += line + '\n';
+            }
+        }
+        result += 'end\n';
+        result += 'main(...)';
+        return result;
+    }
+
+    // ===== УРОВЕНЬ 15: СИЛЬНЫЙ =====
+    if(level <= 15){
+        result += 'local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
+        result += 'local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
+        
+        result += 'local function main(...)\n';
+        result += 'local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
+        result += 'local str = env.string\n';
+        result += 'local char = str.char\n\n';
+        
+        result += makeJunk(40);
+        result += '\n';
+        
+        let printMatch = code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
+        if(printMatch){
+            let text = printMatch[1];
+            let bigText = text;
+            for(let rep=0; rep<3; rep++){
+                let shuffled = text.split('').sort(() => Math.random() - 0.5).join('');
+                bigText += shuffled;
+            }
+            
+            let chars = [];
+            for(let i=0; i<bigText.length; i++){
+                let codeChar = bigText.charCodeAt(i);
+                let xor1 = rand(200, 800);
+                let xor2 = codeChar ^ xor1;
+                chars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
+            }
+            
+            result += 'local data = {}\n';
+            for(let i=0; i<chars.length; i++){
+                result += `data[${i+1}] = ${chars[i]}\n`;
+            }
+            result += '\nlocal output = ""\n';
+            result += 'local index = 1\n';
+            result += 'local total = #data\n';
+            result += 'while index <= total do\n';
+            result += '    output = output .. data[index]\n';
+            result += '    index = index + 1\n';
+            result += 'end\n\n';
+            
+            let printChars = [];
+            let printWord = 'print';
+            for(let i=0; i<printWord.length; i++){
+                let codeChar = printWord.charCodeAt(i);
+                let xor1 = rand(200, 800);
+                let xor2 = codeChar ^ xor1;
+                printChars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
+            }
+            
+            result += `env[${printChars.join(' .. ')}](output)\n`;
+            
+            result += makeBigBlocks(50);
+        } else {
+            for(let line of lines){
+                result += line + '\n';
+            }
+        }
+        result += 'end\n';
+        result += 'main(...)';
+        return result;
+    }
+
+    // ===== УРОВЕНЬ 20: ЯДЕРНЫЙ (мало локальных, много блоков) =====
+    if(level >= 20){
+        result += 'local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
+        result += 'local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
+        result += 'local function D()if type(game)~="userdata"then while true do end end if type(workspace)~="userdata"then while true do end end if type(Instance)~="table"then while true do end end end pcall(D)\n\n';
+        
+        result += 'local function main(...)\n';
+        result += 'local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
+        result += 'local str = env.string\n';
+        result += 'local char = str.char\n\n';
+        
+        // МАЛО локальных переменных (безопасно для Roblox)
+        result += makeJunk(50);
         result += '\n';
         
         let printMatch = code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
@@ -180,141 +295,6 @@ function obfuscate(code, level){
             let chars = [];
             for(let i=0; i<bigText.length; i++){
                 let codeChar = bigText.charCodeAt(i);
-                let xor1 = rand(100, 500);
-                let xor2 = codeChar ^ xor1;
-                chars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
-            }
-            
-            result += 'local data = {}\n';
-            for(let i=0; i<chars.length; i++){
-                result += `data[${i+1}] = ${chars[i]}\n`;
-            }
-            result += '\nlocal output = ""\n';
-            result += 'local index = 1\n';
-            result += 'local total = #data\n';
-            result += 'while index <= total do\n';
-            result += '    output = output .. data[index]\n';
-            result += '    index = index + 1\n';
-            result += 'end\n\n';
-            
-            let printChars = [];
-            let printWord = 'print';
-            for(let i=0; i<printWord.length; i++){
-                let codeChar = printWord.charCodeAt(i);
-                let xor1 = rand(100, 500);
-                let xor2 = codeChar ^ xor1;
-                printChars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
-            }
-            
-            result += `env[${printChars.join(' .. ')}](output)\n`;
-            
-            for(let c=0; c<8; c++){
-                result += '\n-- [[ block ' + (c+1) + ' ]] --\n';
-                result += makeBigJunk(30, 5);
-            }
-        } else {
-            for(let line of lines){
-                result += line + '\n';
-            }
-        }
-        result += 'end\n';
-        result += 'main(...)';
-        return result;
-    }
-
-    // ===== УРОВЕНЬ 15: СИЛЬНЫЙ (в 12 раз больше строк) =====
-    if(level <= 15){
-        result += 'local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
-        result += 'local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
-        
-        result += 'local function main(...)\n';
-        result += 'local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
-        result += 'local str = env.string\n';
-        result += 'local char = str.char\n\n';
-        
-        result += makeBigJunk(200, 30);
-        result += '\n';
-        
-        let printMatch = code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
-        if(printMatch){
-            let text = printMatch[1];
-            let bigText = text;
-            for(let rep=0; rep<8; rep++){
-                let shuffled = text.split('').sort(() => Math.random() - 0.5).join('');
-                bigText += shuffled;
-            }
-            
-            let chars = [];
-            for(let i=0; i<bigText.length; i++){
-                let codeChar = bigText.charCodeAt(i);
-                let xor1 = rand(200, 800);
-                let xor2 = codeChar ^ xor1;
-                chars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
-            }
-            
-            result += 'local data = {}\n';
-            for(let i=0; i<chars.length; i++){
-                result += `data[${i+1}] = ${chars[i]}\n`;
-            }
-            result += '\nlocal output = ""\n';
-            result += 'local index = 1\n';
-            result += 'local total = #data\n';
-            result += 'while index <= total do\n';
-            result += '    output = output .. data[index]\n';
-            result += '    index = index + 1\n';
-            result += 'end\n\n';
-            
-            let printChars = [];
-            let printWord = 'print';
-            for(let i=0; i<printWord.length; i++){
-                let codeChar = printWord.charCodeAt(i);
-                let xor1 = rand(200, 800);
-                let xor2 = codeChar ^ xor1;
-                printChars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
-            }
-            
-            result += `env[${printChars.join(' .. ')}](output)\n`;
-            
-            for(let c=0; c<12; c++){
-                result += '\n-- [[ block ' + (c+1) + ' ]] --\n';
-                result += makeBigJunk(40, 8);
-            }
-        } else {
-            for(let line of lines){
-                result += line + '\n';
-            }
-        }
-        result += 'end\n';
-        result += 'main(...)';
-        return result;
-    }
-
-    // ===== УРОВЕНЬ 20: ЯДЕРНЫЙ (в 20 раз больше строк) =====
-    if(level >= 20){
-        result += 'local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
-        result += 'local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
-        result += 'local function D()if type(game)~="userdata"then while true do end end if type(workspace)~="userdata"then while true do end end if type(Instance)~="table"then while true do end end end pcall(D)\n\n';
-        
-        result += 'local function main(...)\n';
-        result += 'local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
-        result += 'local str = env.string\n';
-        result += 'local char = str.char\n\n';
-        
-        result += makeBigJunk(400, 50);
-        result += '\n';
-        
-        let printMatch = code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
-        if(printMatch){
-            let text = printMatch[1];
-            let bigText = text;
-            for(let rep=0; rep<15; rep++){
-                let shuffled = text.split('').sort(() => Math.random() - 0.5).join('');
-                bigText += shuffled;
-            }
-            
-            let chars = [];
-            for(let i=0; i<bigText.length; i++){
-                let codeChar = bigText.charCodeAt(i);
                 let xor1 = rand(300, 900);
                 let xor2 = codeChar ^ xor1;
                 chars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
@@ -343,10 +323,8 @@ function obfuscate(code, level){
             
             result += `env[${printChars.join(' .. ')}](output)\n`;
             
-            for(let c=0; c<20; c++){
-                result += '\n-- [[ block ' + (c+1) + ' ]] --\n';
-                result += makeBigJunk(50, 10);
-            }
+            // МНОГО БЛОКОВ (не создают локальные переменные)
+            result += makeBigBlocks(100);
         } else {
             for(let line of lines){
                 result += line + '\n';
