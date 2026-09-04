@@ -86,7 +86,7 @@ const b=new Blob([t],{type:'text/plain'});const u=URL.createObjectURL(b);const a
 function randName(){let c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';let n='';for(let i=0;i<8;i++)n+=c.charAt(Math.floor(Math.random()*c.length));return n}
 
 // ============================================================
-// 5 РЕЖИМОВ ОБФУСКАЦИИ (С ПРАВИЛЬНЫМ КОЛИЧЕСТВОМ МУСОРА)
+// 5 РЕЖИМОВ ОБФУСКАЦИИ
 // ============================================================
 function obfuscate(code, level){
     function rand(min, max){return Math.floor(Math.random()*(max-min+1))+min}
@@ -133,14 +133,13 @@ function obfuscate(code, level){
         return result;
     }
     
-    // ===== УРОВЕНЬ 10: НОРМАЛЬНЫЙ (100 МУСОРНЫХ) =====
+    // ===== УРОВЕНЬ 10: НОРМАЛЬНЫЙ =====
     if(level <= 10){
         result += 'local function main(...)\n';
         result += 'local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
         result += 'local str = env.string\n';
         result += 'local char = str.char\n\n';
         
-        // 100 мусорных переменных
         for(let i=0;i<100;i++){
             result += 'local ' + randName() + '=' + rand(1000,99999) + ';\n';
         }
@@ -190,7 +189,7 @@ function obfuscate(code, level){
         return result;
     }
     
-    // ===== УРОВЕНЬ 15: СИЛЬНЫЙ (200 МУСОРНЫХ) =====
+    // ===== УРОВЕНЬ 15: СИЛЬНЫЙ =====
     if(level <= 15){
         result += 'local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
         result += 'local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
@@ -200,7 +199,6 @@ function obfuscate(code, level){
         result += 'local str = env.string\n';
         result += 'local char = str.char\n\n';
         
-        // 200 мусорных переменных
         for(let i=0;i<200;i++){
             result += 'local ' + randName() + '=' + rand(1000,99999) + ';\n';
         }
@@ -250,12 +248,14 @@ function obfuscate(code, level){
         return result;
     }
     
-    // ===== УРОВЕНЬ 20: ЯДЕРНЫЙ (400 МУСОРНЫХ + 3 СЛОЯ АНТИ-ОТЛАДКИ) =====
+    // ===== УРОВЕНЬ 20: ЯДЕРНЫЙ (С VM И СКРЫТЫМИ ОПКОДАМИ) =====
     if(level >= 20){
+        // Анти-отладка 3 слоя
         result += 'local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
         result += 'local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
         result += 'local function D()if type(game)~="userdata"then while true do end end if type(workspace)~="userdata"then while true do end end if type(Instance)~="table"then while true do end end end pcall(D)\n\n';
         
+        // Начало main
         result += 'local function main(...)\n';
         result += 'local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
         result += 'local str = env.string\n';
@@ -270,36 +270,85 @@ function obfuscate(code, level){
         let printMatch = code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
         if(printMatch){
             let text = printMatch[1];
-            let chars = [];
-            for(let i=0; i<text.length; i++){
-                let codeChar = text.charCodeAt(i);
-                let xor1 = rand(300, 900);
-                let xor2 = codeChar ^ xor1;
-                chars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
-            }
             
-            result += 'local data = {}\n';
-            for(let i=0; i<chars.length; i++){
-                result += `data[${i+1}] = ${chars[i]}\n`;
-            }
-            result += '\nlocal output = ""\n';
-            result += 'local index = 1\n';
-            result += 'local total = #data\n';
-            result += 'while index <= total do\n';
-            result += '    output = output .. data[index]\n';
-            result += '    index = index + 1\n';
+            // ===== VM С ОПКОДАМИ =====
+            result += 'local VM = {}\n';
+            result += 'VM.__index = VM\n\n';
+            result += 'function VM.new()\n';
+            result += '    local self = setmetatable({R={}, PC=1, BC={}, CP={}, SP={}}, VM)\n';
+            result += '    return self\n';
             result += 'end\n\n';
             
-            let printChars = [];
-            let printWord = 'print';
-            for(let i=0; i<printWord.length; i++){
-                let codeChar = printWord.charCodeAt(i);
-                let xor1 = rand(300, 900);
-                let xor2 = codeChar ^ xor1;
-                printChars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
+            // Генерация случайных опкодов
+            let ops = [];
+            for(let i=0;i<20;i++){
+                ops.push(rand(1000, 99999));
             }
             
-            result += `env[${printChars.join(' .. ')}](output)\n`;
+            result += 'function VM:execute(BC, CP, SP)\n';
+            result += '    self.BC = BC\n';
+            result += '    self.CP = CP\n';
+            result += '    self.SP = SP\n';
+            result += '    self.PC = 1\n';
+            result += '    self.R = {}\n';
+            result += '    while self.PC <= #self.BC do\n';
+            result += '        local instr = self.BC[self.PC]\n';
+            result += '        local op = (instr >> 24) & 255\n';
+            result += '        local a = (instr >> 16) & 255\n';
+            result += '        local b = (instr >> 8) & 255\n';
+            result += '        local c = instr & 255\n';
+            result += '        self.PC = self.PC + 1\n';
+            result += '        if op == ' + ops[0] + ' then self.R[a] = self.R[b]\n';
+            result += '        elseif op == ' + ops[1] + ' then self.R[a] = self.CP[b]\n';
+            result += '        elseif op == ' + ops[2] + ' then self.R[a] = self.SP[b]\n';
+            result += '        elseif op == ' + ops[3] + ' then self.R[a] = self.R[b] + self.R[c]\n';
+            result += '        elseif op == ' + ops[4] + ' then self.R[a] = self.R[b] .. self.R[c]\n';
+            result += '        elseif op == ' + ops[5] + ' then self.PC = b\n';
+            result += '        elseif op == ' + ops[6] + ' then if not self.R[a] then self.PC = b end\n';
+            result += '        elseif op == ' + ops[7] + ' then if self.R[a] then self.PC = b end\n';
+            result += '        elseif op == ' + ops[8] + ' then \n';
+            result += '            local fn = self.R[a]\n';
+            result += '            local args = {}\n';
+            result += '            for i = 1, b do args[i] = self.R[a + i] end\n';
+            result += '            local res = {fn(table.unpack(args))}\n';
+            result += '            if c > 0 then for i = 1, c do self.R[a + i - 1] = res[i] end end\n';
+            result += '        elseif op == ' + ops[9] + ' then self.R[a] = env[self.SP[b]]\n';
+            result += '        elseif op == ' + ops[10] + ' then env[self.SP[b]] = self.R[a]\n';
+            result += '        elseif op == ' + ops[11] + ' then self.R[a] = char(b)\n';
+            result += '        elseif op == ' + ops[12] + ' then return self.R[a]\n';
+            result += '        else self.R[a] = self.R[b]\n';
+            result += '        end\n';
+            result += '    end\n';
+            result += '    return self.R[1]\n';
+            result += 'end\n\n';
+            
+            // Байткод для print
+            result += 'local vm = VM.new()\n\n';
+            result += 'local BC = {}\n';
+            result += 'local CP = {}\n';
+            result += 'local SP = {}\n';
+            result += 'SP[1] = char(' + rand(100,999) + ')..char(' + rand(100,999) + ')..char(' + rand(100,999) + ')..char(' + rand(100,999) + ')..char(' + rand(100,999) + ')\n';
+            
+            // Строка текста
+            let textChars = [];
+            for(let i=0; i<text.length; i++){
+                textChars.push('char(' + rand(100,900) + ' ^ ' + rand(100,900) + ')');
+            }
+            result += 'CP[1] = ' + textChars.join(' .. ') + '\n';
+            
+            // Инструкции VM
+            let printOp = ops[9];
+            let loadOp = ops[1];
+            let callOp = ops[8];
+            let retOp = ops[12];
+            
+            result += 'BC[1] = (' + printOp + ' << 24) | (1 << 16) | (1 << 8)\n';
+            result += 'BC[2] = (' + loadOp + ' << 24) | (2 << 16) | (1 << 8)\n';
+            result += 'BC[3] = (' + callOp + ' << 24) | (1 << 16) | (1 << 8)\n';
+            result += 'BC[4] = (' + retOp + ' << 24)\n';
+            
+            result += '\nvm:execute(BC, CP, SP)\n';
+            
         } else {
             let lines = code.split('\n');
             for(let line of lines){
