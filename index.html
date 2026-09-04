@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LuaScator — Roblox Obfuscator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a12;color:#e0e0f0;font-family:"Segoe UI",system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+.container{background:#12121e;border-radius:24px;padding:40px;width:1000px;max-width:98%;border:1px solid #252540;box-shadow:0 25px 80px rgba(0,0,0,0.9)}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:12px}
+.logo{font-size:32px;font-weight:800;background:linear-gradient(135deg,#7b3ffc,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.version{background:#1a1a30;padding:4px 14px;border-radius:30px;font-size:12px;color:#6666aa;border:1px solid #252545}
+.badge{background:linear-gradient(135deg,#7b3ffc22,#00d4ff22);border:1px solid #7b3ffc44;padding:4px 16px;border-radius:30px;font-size:11px;color:#8888dd}
+.subtitle{color:#6666aa;font-size:14px;margin-bottom:28px;border-bottom:1px solid #1a1a2e;padding-bottom:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.subtitle span{color:#7b3ffc}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;background:#0d0d18;padding:18px 22px;border-radius:16px;border:1px solid #1a1a2e;margin-bottom:22px}
+.setting-item{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.setting-item label{font-size:13px;color:#8888bb;font-weight:500;min-width:100px}
+.setting-item select{background:#0a0a14;border:1px solid #252545;color:#d0d0f0;padding:6px 12px;border-radius:8px;font-size:13px;flex:1;min-width:80px;outline:none}
+.setting-item select:focus{border-color:#7b3ffc}
+textarea{width:100%;height:200px;background:#0a0a14;border:1px solid #1e1e34;border-radius:14px;color:#d0d0f0;padding:16px 18px;font-family:monospace;font-size:14px;resize:vertical;outline:none}
+textarea:focus{border-color:#7b3ffc}
+.btn{padding:14px 32px;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;transition:0.3s;display:inline-flex;align-items:center;gap:10px;justify-content:center}
+.btn-primary{background:linear-gradient(135deg,#7b3ffc,#5a2bc0);color:#fff;box-shadow:0 4px 25px rgba(123,63,252,0.25);width:100%;margin-top:12px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(123,63,252,0.35)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn-secondary{background:#1a1a2e;color:#8888bb;border:1px solid #2a2a4a;padding:6px 16px;font-size:12px}
+.btn-secondary:hover{background:#222244;color:#ccccee}
+.button-row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.button-row .btn{flex:1;min-width:120px}
+.output-wrapper{background:#0a0a14;border-radius:14px;border:1px solid #1a1a2e;min-height:120px;max-height:400px;overflow-y:auto;padding:16px 18px;font-family:monospace;font-size:13px;color:#a0a0c0;white-space:pre-wrap;word-wrap:break-word;margin-top:8px}
+.output-wrapper:empty::before{content:"⬇ Результат обфускации появится здесь...";color:#333355;font-style:italic}
+.output-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.status-bar{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid #1a1a2e;font-size:13px;color:#555577;flex-wrap:wrap;gap:8px}
+.status-bar .status{display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot.idle{background:#333355}
+.dot.loading{background:#ffcc00;animation:pulse 0.8s infinite}
+.dot.success{background:#44ff88}
+.dot.error{background:#ff4466}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.footer{margin-top:20px;text-align:center;color:#222244;font-size:12px;border-top:1px solid #111122;padding-top:16px}
+.footer a{color:#444466;text-decoration:none}
+.footer a:hover{color:#7b3ffc}
+.timer{color:#333366;font-size:12px}
+.loader-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);z-index:999;justify-content:center;align-items:center;flex-direction:column;gap:20px}
+.loader-overlay.active{display:flex}
+.loader-spinner{width:50px;height:50px;border:3px solid #1a1a3a;border-top-color:#7b3ffc;border-radius:50%;animation:spin 0.9s linear infinite}
+@keyframes spin{100%{transform:rotate(360deg)}}
+.loader-overlay p{color:#8888bb;font-size:16px}
+.progress{width:300px;max-width:80%;height:4px;background:#1a1a3a;border-radius:10px;overflow:hidden}
+.progress .bar{height:100%;width:0%;background:linear-gradient(90deg,#7b3ffc,#00d4ff);border-radius:10px;transition:width 0.5s}
+@media (max-width:700px){.container{padding:20px}.settings-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="loader-overlay" id="loaderOverlay"><div class="loader-spinner"></div><p id="loaderText">🔒 Обфускация кода...</p><div class="progress"><div class="bar" id="progressBar"></div></div></div>
+<div class="container">
+<div class="header"><div class="header-left"><span class="logo">⚡ LuaScator</span><span class="version">v25.0</span></div><div><span class="badge">🔥 Nuclear Edition</span></div></div>
+<div class="subtitle"><span>ROBLOX LUA OBFUSCATOR — <span>by nxtzy_</span></span><span style="color:#444466;">⚡ 32768 опкодов • 10 ключей • VM</span></div>
+<div class="settings-grid">
+<div class="setting-item"><label>🛡 Уровень</label><select id="levelSelect"><option value="5">Средний (5)</option><option value="8">Высокий (8)</option><option value="10" selected>Максимальный (10)</option><option value="15">🔥 Ядерный (15)</option><option value="20">💀 Абсолют (20)</option></select></div>
+<div class="setting-item"><label>🔑 Ключи</label><select id="keysSelect"><option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option></select></div>
+<div class="setting-item"><label>🧹 Мусор</label><select id="junkSelect"><option value="50">50</option><option value="100" selected>100</option><option value="200">200</option><option value="500">500</option></select></div>
+<div class="setting-item"><label>🎯 Защита</label><select id="protectionSelect"><option value="2">Стандартная</option><option value="5" selected>Усиленная (5)</option><option value="10">Максимальная (10)</option></select></div>
+<div class="setting-item"><label>📦 VM</label><select id="vmSelect"><option value="1">Включена</option><option value="0">Выключена</option></select></div>
+<div class="setting-item"><label>🔓 Анти-отладка</label><select id="antiDebugSelect"><option value="0">Выключена</option><option value="1" selected>Включена</option></select></div>
+</div>
+<textarea id="inputCode" placeholder="-- Вставь свой Lua скрипт сюда&#10;print(Hello Roblox!)">print("Hello World")</textarea>
+<button class="btn btn-primary" id="obfuscateBtn">🔒 OBFUSCATE</button>
+<div class="button-row"><button class="btn btn-secondary" id="clearBtn">🗑 Очистить</button><button class="btn btn-secondary" id="loadExampleBtn">📂 Пример</button></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;color:#7777aa;margin-top:10px;"><span>📦 Результат обфускации</span><span id="outputCount">0 символов</span></div>
+<div class="output-wrapper" id="output"></div>
+<div class="output-actions"><button class="btn btn-secondary" id="copyBtn">📋 Копировать</button><button class="btn btn-secondary" id="downloadBtn">💾 Скачать .lua</button><button class="btn btn-secondary" id="clearOutputBtn">🗑 Очистить вывод</button></div>
+<div class="status-bar"><div class="status"><span class="dot idle" id="statusDot"></span><span id="statusText">Готов к работе</span></div><div class="timer" id="timerDisplay">⏱ 0.00с</div></div>
+<div class="footer"><a href="#">LuaScator</a> — <a href="#">by nxtzy_</a> — <a href="#">для Luasnapper</a></div>
+</div>
+<script>
+const inputCode=document.getElementById("inputCode");
+const output=document.getElementById("output");
+const obfuscateBtn=document.getElementById("obfuscateBtn");
+const clearBtn=document.getElementById("clearBtn");
+const loadExampleBtn=document.getElementById("loadExampleBtn");
+const copyBtn=document.getElementById("copyBtn");
+const downloadBtn=document.getElementById("downloadBtn");
+const clearOutputBtn=document.getElementById("clearOutputBtn");
+const statusText=document.getElementById("statusText");
+const statusDot=document.getElementById("statusDot");
+const timerDisplay=document.getElementById("timerDisplay");
+const outputCount=document.getElementById("outputCount");
+const loaderOverlay=document.getElementById("loaderOverlay");
+const loaderText=document.getElementById("loaderText");
+const progressBar=document.getElementById("progressBar");
+const levelSelect=document.getElementById("levelSelect");
+const keysSelect=document.getElementById("keysSelect");
+const junkSelect=document.getElementById("junkSelect");
+const protectionSelect=document.getElementById("protectionSelect");
+const vmSelect=document.getElementById("vmSelect");
+const antiDebugSelect=document.getElementById("antiDebugSelect");
+let startTime=0,timerInterval=null,isProcessing=false;
+const exampleCode=["-- Простой пример","local Players = game:GetService(\"Players\")","local LocalPlayer = Players.LocalPlayer","","print(\"Привет, Roblox!\")","","local function onCharacterAdded(char)","    print(\"Персонаж заспавнился!\")","end","","LocalPlayer.CharacterAdded:Connect(onCharacterAdded)","","while true do","    task.wait(1)","    print(\"Tick!\")","end"].join("\n");
+loadExampleBtn.addEventListener("click",function(){inputCode.value=exampleCode;setStatus("📂 Пример загружен","idle")});
+clearBtn.addEventListener("click",function(){inputCode.value="";setStatus("🗑 Очищено","idle")});
+clearOutputBtn.addEventListener("click",function(){output.innerHTML="";outputCount.textContent="0 символов";setStatus("🗑 Вывод очищен","idle")});
+copyBtn.addEventListener("click",function(){const text=output.textContent;if(!text||text.includes("⬇ Результат")){setStatus("❌ Нет данных для копирования","error");return}navigator.clipboard.writeText(text).then(()=>{setStatus("✅ Скопировано!","success");setTimeout(()=>setStatus("Готов к работе","idle"),2000)}).catch(()=>{const range=document.createRange();range.selectNode(output);window.getSelection().removeAllRanges();window.getSelection().addRange(range);document.execCommand("copy");setStatus("✅ Скопировано!","success")})});
+downloadBtn.addEventListener("click",function(){const text=output.textContent;if(!text||text.includes("⬇ Результат")){setStatus("❌ Нет данных для скачивания","error");return}const blob=new Blob([text],{type:"text/plain"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="obfuscated_"+Date.now()+".lua";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);setStatus("💾 Файл скачан!","success")});
+function setStatus(text,type){statusText.textContent=text;statusDot.className="dot "+type}
+function setLoading(text){statusText.textContent=text;statusDot.className="dot loading"}
+function startTimer(){startTime=performance.now();clearInterval(timerInterval);timerInterval=setInterval(()=>{const elapsed=(performance.now()-startTime)/1000;timerDisplay.textContent="⏱ "+elapsed.toFixed(2)+"с"},50)}
+function stopTimer(){clearInterval(timerInterval);const elapsed=(performance.now()-startTime)/1000;timerDisplay.textContent="⏱ "+elapsed.toFixed(2)+"с"}
+let progressInterval=null;
+function startProgress(){let progress=0;progressBar.style.width="0%";clearInterval(progressInterval);progressInterval=setInterval(()=>{progress+=Math.random()*3+1;if(progress>90)progress=90;progressBar.style.width=progress+"%"},200)}
+function finishProgress(){clearInterval(progressInterval);progressBar.style.width="100%";setTimeout(()=>{progressBar.style.width="0%"},500)}
+obfuscateBtn.addEventListener("click",async function(){const code=inputCode.value.trim();if(!code){setStatus("❌ Вставь код!","error");return}if(isProcessing)return;isProcessing=true;obfuscateBtn.disabled=true;obfuscateBtn.textContent="⏳ ОБРАБОТКА...";loaderOverlay.classList.add("active");loaderText.textContent="🔒 Обфускация кода...";startProgress();setLoading("⏳ Обфускация...");startTimer();try{const level=parseInt(levelSelect.value);const keys=parseInt(keysSelect.value);const junk=parseInt(junkSelect.value);const protection=parseInt(protectionSelect.value);const vm=parseInt(vmSelect.value);const antiDebug=parseInt(antiDebugSelect.value);const response=await fetch("/obfuscate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,options:{level:level,keys:keys,junk:junk,protection:protection,vm:vm===1,antiDebug:antiDebug===1}})});if(!response.ok){const errorText=await response.text();throw new Error(errorText||"Ошибка сервера")}const data=await response.json();if(data.error){throw new Error(data.error)}output.textContent=data.result;outputCount.textContent=data.result.length+" символов";finishProgress();stopTimer();setStatus("✅ Обфускация завершена!","success");loaderText.textContent="✅ Готово!";setTimeout(()=>{loaderOverlay.classList.remove("active")},600)}catch(err){finishProgress();stopTimer();output.textContent="❌ Ошибка: "+err.message;outputCount.textContent="0 символов";setStatus("❌ "+err.message,"error");loaderText.textContent="❌ Ошибка: "+err.message;setTimeout(()=>{loaderOverlay.classList.remove("active")},1500)}isProcessing=false;obfuscateBtn.disabled=false;obfuscateBtn.textContent="🔒 OBFUSCATE"});
+document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();obfuscateBtn.click()}});
+console.log("⚡ LuaScator Web v25.0 загружен!");
+console.log("📌 Горячая клавиша: Ctrl+Enter для обфускации");
+</script>
+</body>
+</html>
