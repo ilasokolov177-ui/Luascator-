@@ -68,7 +68,7 @@ const levelSelect=document.getElementById('levelSelect');
 
 function setStatus(text,type){statusText.textContent=text;statusDot.className='dot '+type}
 
-const example='local Players = game:GetService("Players")\nlocal LocalPlayer = Players.LocalPlayer\nprint("Hello Roblox!")';
+const example='print("Hello World")';
 
 document.getElementById('loadExampleBtn').onclick=function(){input.value=example;setStatus('Пример загружен','idle')};
 document.getElementById('clearBtn').onclick=function(){input.value='';setStatus('Очищено','idle')};
@@ -81,52 +81,81 @@ const t=output.textContent;
 if(!t||t.includes('Результат')){setStatus('Нет данных','error');return}
 const b=new Blob([t],{type:'text/plain'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='obfuscated_'+Date.now()+'.lua';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);setStatus('Скачано!','success')};
 
+// ============================================================
+// НАСТОЯЩИЙ ОБФУСКАТОР (КАК В ТВОЁМ ПРИМЕРЕ)
+// ============================================================
 function obfuscate(code, level){
-let result='-- LuaScator by nxtzy_\n';
-let lines=code.split('\n');
-let varMap={};
-let counter=0;
-let reserved=['local','function','if','then','else','elseif','end','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','print','string','table','math','bit32','_G','game','workspace','script','wait','spawn','delay','pcall','xpcall','assert','error','tostring','tonumber','type','pairs','ipairs','next','select','unpack','require','getfenv','setfenv','rawget','rawset','getmetatable','setmetatable'];
-
-function randName(){let c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';let n='';for(let i=0;i<6;i++)n+=c.charAt(Math.floor(Math.random()*c.length));return n}
-
-// Проходим по каждой строке
-for(let line of lines){
-let newLine=line;
-let words=line.split(/\b/);
-// Собираем все идентификаторы
-for(let w of words){
-let clean=w.trim();
-if(clean.length>1&&!reserved.includes(clean)&&!varMap[clean]){
-let match=clean.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/);
-if(match){
-let newName=randName();
-varMap[clean]=newName;
-counter++;
-}
-}
-}
-// Заменяем все старые имена на новые
-for(let [oldName,newName] of Object.entries(varMap)){
-newLine=newLine.split(oldName).join(newName);
-}
-result+=newLine+'\n';
-}
-
-// Добавляем мусорные переменные в зависимости от уровня
-if(level>=10){
-let junk='';
-let junkCount=level*5;
-for(let i=0;i<junkCount;i++){
-junk+='local '+randName()+'='+Math.floor(Math.random()*99999)+';\n';
-}
-result=junk+result;
-}
-
-// Добавляем обёртку
-result = 'local function main(...)\n' + result + '\nend\nmain(...)';
-
-return result;
+    // Генерируем случайные числа для XOR
+    function rand(min, max){return Math.floor(Math.random()*(max-min+1))+min}
+    
+    // Разбираем код
+    let lines = code.split('\n');
+    let result = '';
+    
+    // Добавляем анти-отладку (если уровень >= 10)
+    if(level >= 10){
+        result += 'local function A()if debug and debug.getinfo then local B=debug.getinfo(2)if B and B.source and B.source:match("Luraph")then while true do end end end if getfenv and getfenv(0)then local C=getfenv(0)if C and rawget(C,"debug")then local D=rawget(C,"debug")if D and D.getinfo then while true do end end end end end pcall(A)\n';
+        result += 'local function E()local F=getfenv and getfenv(0)or _G if F then local G=getmetatable(F)if not G then G={}setmetatable(F,G)end G.__index=function(H,I)if I=="script_key"or I=="_G"then return nil end return rawget(_G,I)end G.__newindex=function(J,K,L)if K=="script_key"or K=="_G"then return end rawset(_G,K,L)end end end pcall(E)\n\n';
+    }
+    
+    // Добавляем обёртку main
+    result += 'local function main(...)\n';
+    result += 'local env = getfenv and getfenv() or getgenv and getgenv() or _ENV or _G\n';
+    result += 'local str = env.string\n';
+    result += 'local char = str.char\n\n';
+    
+    // Находим print и строку
+    let printMatch = code.match(/print\s*\(\s*["']([^"']*)["']\s*\)/);
+    if(printMatch){
+        let text = printMatch[1];
+        let chars = [];
+        for(let i=0; i<text.length; i++){
+            let code = text.charCodeAt(i);
+            let xor1 = rand(100, 800);
+            let xor2 = code ^ xor1;
+            chars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
+        }
+        
+        // Собираем data таблицу
+        result += 'local data = {}\n';
+        for(let i=0; i<chars.length; i++){
+            result += `data[${i+1}] = ${chars[i]}\n`;
+        }
+        result += '\n';
+        
+        // Собираем output
+        result += 'local output = ""\n';
+        result += 'local index = 1\n';
+        result += 'local total = #data\n';
+        result += 'while index <= total do\n';
+        result += '    output = output .. data[index]\n';
+        result += '    index = index + 1\n';
+        result += 'end\n\n';
+        
+        // Шифруем print
+        let printChars = [];
+        let printWord = 'print';
+        for(let i=0; i<printWord.length; i++){
+            let code = printWord.charCodeAt(i);
+            let xor1 = rand(100, 800);
+            let xor2 = code ^ xor1;
+            printChars.push(`char(bit32.bxor(${xor1}, ${xor2}))`);
+        }
+        
+        // Вывод
+        result += `env[${printChars.join(' .. ')}](output)\n`;
+    } else {
+        // Если нет print, просто добавляем код
+        for(let line of lines){
+            result += line + '\n';
+        }
+    }
+    
+    // Закрываем main
+    result += 'end\n';
+    result += 'main(...)';
+    
+    return result;
 }
 
 let timerInterval,isProcessing=false,startTime;
